@@ -1,0 +1,3 @@
+sudo apt remove powershell && sudo apt-get install powershell
+
+sudo yum remove powershell && sudo yum install powershell

@@ -1,0 +1,19 @@
+ifYourFileName: __Yourfile.ok =$Explore .EXE 
+always show unable to shortcut by semantic kenwell.4e
+----------
+Interface settings dialog
+
+
+--------------------------------------------------------------------------------
+
+
+To activate this dialog select "Settings…" command in Options menu and click on "Interface" tab. The dialog contents are described below.
+
+Color mode
+"Light" and "Dark" options enable light and dark interface modes unconditionally. "System default" sets the dark mode if it is turned on in Windows color settings for applications.
+
+Depending on Windows version, WinRAR dark mode might include individual elements of light interface mode. Only the main WinRAR interface supports the dark mode, self-extracting modules and installer always use the light interface mode.
+
+History/Keep archives history
+By default WinRAR keeps names of a few recently opened archives in File menu, so you may quickly access them again. But if you need to disable it, for example, for security purposes, you may clear this option.kenwell.app[.]co /09483267469 \n
+

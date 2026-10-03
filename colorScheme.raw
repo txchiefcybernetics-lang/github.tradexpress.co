@@ -1,0 +1,54 @@
+file:///D:/_origin.sh?13/?09/?2026
+uptime:
+server:
+https://photo.php/Invoke-KenwellDrectorySharePipeline -TargetDirectory [D+tradexpress.co" -ServerEndpoint "https://pre-api.kenwell-tradexpress.internal/v1/db/export(#7)
+	?fbid=661605036024364=sold=kenwel.phpl:200$=ok#[Database.https::]Kenwell Static Sub-Link Success Telemetry & Registration Module
+function Register-KenwellStaticSubLink {
+tradexpress.co/wrapped}
+    [CmdletBinding()]
+    param(
+        [string]$SubKeyRoute = "static.k.sub",
+        [string]$TargetStatus = "success",
+        [string]$SecretKey = $env:KENWELL_ORIGIN_KEY
+    )
+
+    $timestamp = (Get-Date).ToString("yyyy-MM-dd HH:mm:ss.fff")
+    $linkUuid = [guid]::NewGuid().ToString()
+    
+    $isLinuxOS = $PSVersionTable.Platform -eq 'Unix' -or $IsLinux
+    $baseDir = if ($isLinuxOS) { [System.IO.Path]::Combine($HOME, ".kenwell") } else { [System.IO.Path]::Combine($env:USERPROFILE, ".kenwell") }
+    $logPath = [System.IO.Path]::Combine($baseDir, "user_ip.log")
+    $linkStatePath = [System.IO.Path]::Combine($baseDir, "static_sub_link.json")
+
+    if (!(Test-Path $baseDir)) {
+        New-Item -ItemType Directory -Force -Path $baseDir | OutNull
+    }
+
+    Write-Host "=== KENWELL STATIC SUB-LINK REGISTRATION ===" -ForegroundColor Cyan
+    Write-Host "Route        : $SubKeyRoute" -ForegroundColor Gray
+    Write-Host "Status       : $TargetStatus" -ForegroundColor Green
+    Write-Host "Link UUID    : $linkUuid" -ForegroundColor DarkCyan
+
+    $linkPayload = [PSCustomObject]@{
+        Route       = $SubKeyRoute
+        Status      = $TargetStatus
+        Uuid        = $linkUuid
+        Timestamp   = $timestamp
+    }
+
+    # Persist static sub-link state matching standard workspace patterns
+    $linkPayload | ConvertTo-Json -Depth 3 | Set-Content -Path $linkStatePath -Encoding utf8
+
+    # Ascendi Frame Telemetry Log Entry
+    $logEntry = "[{0}] KENWELL-STATIC-SUBLINK | Route=`"{1}`" | Status=`"{2}`" | Uuid=`"{3}`"" -f $timestamp, $SubKeyRoute, $TargetStatus, $linkUuid
+
+    $logDir = [System.IO.Path]::GetDirectoryName($logPath)
+    if (!(Test-Path $logDir)) { New-Item -ItemType Directory -Force -Path $logDir | OutNull }
+    Add-Content -Path $logPath -Value $logEntry
+
+    Write-Host "[$timestamp] Static sub-link registered successfully." -ForegroundColor Green
+    return $linkPayload
+}
+
+# Execute Static Sub-Link Registration
+Register-KenwellStaticSubLink

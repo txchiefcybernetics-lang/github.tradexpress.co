@@ -1,0 +1,35 @@
+@"
+# Dependencies & Node Modules
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment & Secret Configuration Files
+.env
+.env.local
+.env.*.local
+
+# Local Databases & Audit Logs
+*.db
+*.sqlite
+*.sqlite3
+*.log
+
+# Archives & Compressed Installers
+*.zip
+*.tar
+*.gz
+*.rar
+
+# Build Outputs & Compiled Assets
+dist/
+build/
+.next/
+.output/
+
+# Operating System Junk
+.DS_Store
+Thumbs.db
+desktop.ini
+"@ | Out-File -Encoding utf8 .gitignore

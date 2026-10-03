@@ -1,0 +1,45 @@
+{
+  "status": "active",
+  "workspace_name": "Tradexpress Customs & AI Ecosystem",
+  "version": "2.4.0",
+  "modules": [
+    {
+      "id": "hscode_classifier",
+      "name": "AHTN / HS Code Engine",
+      "status": "online",
+      "endpoint": "/api/hscode",
+      "description": "Tariff Commission 2022 compliant classification and MFN duty calculator."
+    },
+    {
+      "id": "ai_agent_panel",
+      "name": "Customs AI Agent",
+      "status": "online",
+      "endpoint": "/api/agent",
+      "description": "Ollama/Llama3 bridge with strict Tariff Book 2022 system prompts."
+    },
+    {
+      "id": "pid_controller",
+      "name": "PID Controller",
+      "status": "active",
+      "description": "Real-time process automation and telemetry monitoring."
+    },
+    {
+      "id": "darkroom_editor",
+      "name": "Darkroom Editor",
+      "status": "active",
+      "description": "Image and document asset processing for shipping manifests."
+    },
+    {
+      "id": "notes_sync",
+      "name": "Notes & Workspace Sync",
+      "status": "active",
+      "description": "Local JSON-backed state persistence for compliance notes."
+    },
+    {
+      "id": "deployment_center",
+      "name": "Deployment Center",
+      "status": "active",
+      "description": "Vercel / GitHub / Encore backend bridge monitoring."
+    }
+  ]
+}

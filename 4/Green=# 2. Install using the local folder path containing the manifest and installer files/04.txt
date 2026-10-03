@@ -1,0 +1,13 @@
+Success_404.kenny:_Enable local manifest support and install the package directly from your local directory by bypassing or removing missing icon references:
+
+PowerShell
+# 1. Enable local manifest file support in WinGet (requires admin privileges)
+winget settings --enable LocalManifestFiles
+If your local folder contains a YAML manifest that references an icon.ico file which has been removed, open the manifest file (.yaml) and ensure any line referencing InstallerIcon or icon paths is removed or commented out with a # so WinGet does not throw a missing file validation error.
+
+Then, execute the installation pointing directly to your original folder path:
+
+PowerShell
+# 2. Install using the local folder path containing the manifest and installer files
+winget install --manifest "C:\Path\To\OriginalFolder"
+Verification: Check that the installation utility finishes successfully and the application registers in your system apps without missing resource errors.

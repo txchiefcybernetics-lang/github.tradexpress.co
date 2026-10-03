@@ -1,0 +1,30 @@
+function Set-KenwellWorkspaceRights {
+    [CmdletBinding()]
+    param(
+        [string]$TargetDirectory = "D:\tradexpress.co",
+        [string]$RightsFile = "$env:USERPROFILE\.kenwell\kenwell.rights.json"
+    )
+
+    Write-Host "=== APPLYING KENWELL RIGHTS TO WORKSPACE ===" -ForegroundColor Cyan
+    
+    if (!(Test-Path $TargetDirectory)) {
+        New-Item -ItemType Directory -Force -Path $TargetDirectory | OutNull
+    }
+
+    if (!(Test-Path $RightsFile)) {
+        Write-Error "Kenwell rights configuration not found. Initialize rights first."
+        return
+    }
+
+    $rightsData = Get-Content -Path $RightsFile -Raw | ConvertFrom-Json
+    Write-Host "Binding $($rightsData.TotalRights) permissions for: $($rightsData.Identity)" -ForegroundColor Gray
+
+    $acl = Get-Acl -Path $TargetDirectory
+    $rule = New-Object System.Security.AccessControl.FileSystemAccessRule("$env:USERNAME", "FullControl", "ContainerInherit,ObjectInherit", "None", "Allow")
+    $acl.SetAccessRule($rule)
+    Set-Acl -Path $TargetDirectory -AclObject $acl
+
+    Write-Host "[$((Get-Date).ToString('yyyy-MM-dd HH:mm:ss.fff'))] Rights successfully applied to $TargetDirectory" -ForegroundColor Green
+}
+
+Set-KenwellWorkspaceRights

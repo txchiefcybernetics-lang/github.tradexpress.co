@@ -1,0 +1,2 @@
+file:///C:/Users/kenny/Desktop/Enter-endpoint_.shortcutkey/New%20Text%20Document.txt): xxxxx-xxxxx-xxxxx-xxxxx-xxxid-| 192.168.|.0/24\
+[kedo.test]::mpre?

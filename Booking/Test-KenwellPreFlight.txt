@@ -1,0 +1,56 @@
+# Kenwell Pre-Production Environment & Pre-Flight Validation Module
+function Test-KenwellPreFlight {
+    [CmdletBinding()]
+    param(
+        [string]$Environment = "pre",
+        [string]$StagingEndpoint = "https://pre-api.kenwell-tradexpress.internal/v1/health",
+        [string]$SecretKey = $env:KENWELL_ORIGIN_KEY
+    )
+
+    $timestamp = (Get-Date).ToString("yyyy-MM-dd HH:mm:ss.fff")
+    $sessionUuid = [guid]::NewGuid().ToString()
+    
+    $isLinuxOS = $PSVersionTable.Platform -eq 'Unix' -or $IsLinux
+    $baseDir = if ($isLinuxOS) { [System.IO.Path]::Combine($HOME, ".kenwell") } else { [System.IO.Path]::Combine($env:USERPROFILE, ".kenwell") }
+    $logPath = [System.IO.Path]::Combine($baseDir, "user_ip.log")
+
+    if (!(Test-Path $baseDir)) {
+        New-Item -ItemType Directory -Force -Path $baseDir | OutNull
+    }
+
+    Write-Host "=== KENWELL PRE-PRODUCTION PRE-FLIGHT CHECK ===" -ForegroundColor Cyan
+    Write-Host "Environment  : $Environment" -ForegroundColor Gray
+    Write-Host "Endpoint     : $StagingEndpoint" -ForegroundColor DarkCyan
+
+    $validationResults = [System.Collections.Generic.List[PSCustomObject]]::new()
+
+    # Check 1: Origin Key Verification
+    $hasKey = -not [string]::IsNullOrEmpty($SecretKey)
+    $validationResults.Add([PSCustomObject]@{ Check = "KENWELL_ORIGIN_KEY"; Status = $(if($hasKey){"Passed"}else{"Warning: Unbound"}) })
+
+    # Check 2: Directory Write Access
+    $testFile = [System.IO.Path]::Combine($baseDir, "pre_test.tmp")
+    $canWrite = try { "test" | Set-Content -Path $testFile -Force; Remove-Item -Path $testFile -Force; $true } catch { $false }
+    $validationResults.Add([PSCustomObject]@{ Check = "Directory Write Access"; Status = $(if($canWrite){"Passed"}else{"Failed"}) })
+
+    # Check 3: Protocol Security
+    try {
+        [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12 -bor [Net.SecurityProtocolType]::Tls13
+        $validationResults.Add([PSCustomObject]@{ Check = "TLS 1.2/1.3 Enforcement"; Status = "Passed" })
+    } catch {
+        $validationResults.Add([PSCustomObject]@{ Check = "TLS 1.2/1.3 Enforcement"; Status = "Failed" })
+    }
+
+    $validationResults | Format-Table -AutoSize
+
+    $logEntry = "[{0}] KENWELL-PRE-FLIGHT | Env=`"{1}`" | Status=`"Completed`"" -f $timestamp, $Environment
+    $logDir = [System.IO.Path]::GetDirectoryName($logPath)
+    if (!(Test-Path $logDir)) { New-Item -ItemType Directory -Force -Path $logDir | OutNull }
+    Add-Content -Path $logPath -Value $logEntry
+
+    Write-Host "[$timestamp] Pre-flight validation sequence completed." -ForegroundColor Green
+    return $validationResults
+}
+
+# Execute Pre-Flight Checks for Staging/Pre-Production
+Test-KenwellPreFlight

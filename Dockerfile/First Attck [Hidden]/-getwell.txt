@@ -1,0 +1,57 @@
+indention=1tab 1L=1psi -ps-[]	status	.append all Lang/.
+out/*out Kenwell Counted Rights & Permissions Management Module
+function Initialize-KenwellRights {
+    [CmdletBinding()]
+    param(
+        [string]$UserIdentity = "kenwell.nano.user",
+        [string[]]$Permissions = @("Read", "Write", "Execute", "Sync", "Stream"),
+        [string]$SecretKey = $env:KENWELL_ORIGIN_KEY
+    )
+
+    $timestamp = (Get-Date).ToString("yyyy-MM-dd HH:mm:ss.fff")
+    $rightsUuid = [guid]::NewGuid().ToString()
+    
+    $isLinuxOS = $PSVersionTable.Platform -eq 'Unix' -or $IsLinux
+    $baseDir = if ($isLinuxOS) { [System.IO.Path]::Combine($HOME, ".kenwell") } else { [System.IO.Path]::Combine($env:USERPROFILE, ".kenwell") }
+    $rightsPath = [System.IO.Path]::Combine($baseDir, "kenwell.rights.json")
+    $logPath = [System.IO.Path]::Combine($baseDir, "user_ip.log")
+
+    if (!(Test-Path $baseDir)) {
+        New-Item -ItemType Directory -Force -Path $baseDir | OutNull
+    }
+
+    $countedRights = $Permissions.Count
+
+    Write-Host "=== KENWELL COUNTED RIGHTS REGISTRATION ===" -ForegroundColor Cyan
+    Write-Host "User Identity  : $UserIdentity" -ForegroundColor Gray
+    Write-Host "Total Rights   : $countedRights Enforced" -ForegroundColor DarkCyan
+    Write-Host "Rights UUID    : $rightsUuid" -ForegroundColor Yellow
+
+    try {
+        $rightsConfig = [PSCustomObject]@{
+            Identity    = $UserIdentity
+            TotalRights = $countedRights
+            Permissions = $Permissions
+            RightsUuid  = $rightsUuid
+            Status      = "Active"
+            Timestamp   = $timestamp
+        }
+
+        $rightsConfig | ConvertTo-Json -Depth 4 | Set-Content -Path $rightsPath -Encoding utf8
+        
+        $logEntry = "[{0}] KENWELL-RIGHTS | Identity=`"{1}`" | Count=`"{2}`" | Status=`"Registered`"" -f $timestamp, $UserIdentity, $countedRights
+        $logDir = [System.IO.Path]::GetDirectoryName($logPath)
+        if (!(Test-Path $logDir)) { New-Item -ItemType Directory -Force -Path $logDir | OutNull }
+        Add-Content -Path $logPath -Value $logEntry
+
+        Write-Host "[$timestamp] Counted rights successfully initialized and persisted." -ForegroundColor Green
+        return $rightsConfig
+    }
+    catch {
+        $ex = $_.Exception
+        Write-Error "Failed to initialize kenwell rights: $($ex.Message)"
+    }
+}
+
+# Execute counted rights initialization
+Initialize-KenwellRights--[-]

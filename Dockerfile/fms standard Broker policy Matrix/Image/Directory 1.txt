@@ -1,0 +1,15 @@
+D:\tradexpress.co" | Select-Object -ExpandProperty Access | Format-Table IdentityReference, FileSystemRights, AccessControlType -AutoSize
+
+IdentityReference                           FileSystemRights AccessControlType
+-----------------                           ---------------- -----------------
+BUILTIN\Administrators                           FullControl             Allow
+BUILTIN\Administrators                             268435456             Allow
+NT AUTHORITY\SYSTEM                              FullControl             Allow
+NT AUTHORITY\SYSTEM                                268435456             Allow
+NT AUTHORITY\Authenticated Users         Modify, Synchronize             Allow
+NT AUTHORITY\Authenticated Users                  -536805376             Allow
+BUILTIN\Users                    ReadAndExecute, Synchronize             Allow
+BUILTIN\Users                                    -1610612736             Allow
+
+
+PS D:\tradexpress.co>

@@ -1,0 +1,57 @@
+.kenny.app.19>quit:q=searc
+	h- # Kenwell App Connectivity & Endpoint Verification for na.kenny.app
+function Test-KenwellAppEndpoint {
+    param(
+        [string]$AppUrl = "https://na.kenny.app",
+        [string]$SecretKey = $env:KENWELL_ORIGIN_KEY
+    )
+
+    $timestamp = (Get-Date).ToString("yyyy-MM-dd HH:mm:ss.fff")
+    $sessionUuid = [guid]::NewGuid().ToString()
+    
+    $isLinuxOS = $PSVersionTable.Platform -eq 'Unix' -or $IsLinux
+    $baseDir = if ($isLinuxOS) { [System.IO.Path]::Combine($HOME, ".kenwell") } else { [System.IO.Path]::Combine($env:USERPROFILE, ".kenwell") }
+    $logPath = [System.IO.Path]::Combine($baseDir, "user_ip.log")
+
+    if (!(Test-Path $baseDir)) {
+        New-Item -ItemType Directory -Force -Path $baseDir | OutNull
+    }
+
+    Write-Host "=== KENWELL APP ENDPOINT TEST: na.kenny.app ===" -ForegroundColor Cyan
+    Write-Host "Target URL   : $AppUrl" -ForegroundColor Gray
+    Write-Host "Session UUID : $sessionUuid" -ForegroundColor DarkCyan
+
+    try {
+        [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12 -bor [Net.SecurityProtocolType]::Tls13
+
+        $headers = @{
+            "Authorization"     = "Bearer $(if($SecretKey){$SecretKey}else{'sk-kenwell-unbound-secret'})"
+            "X-Kenwell-Session" = $sessionUuid
+        }
+
+        $response = Invoke-WebRequest -Uri $AppUrl -Method GET -Headers $headers -ErrorAction Stop
+        
+        $logEntry = "[{0}] KENWELL-APP-TEST | Target=`"{1}`" | StatusCode=`"{2}`" | Status=`"Connected`"" -f $timestamp, $AppUrl, $response.StatusCode
+        Write-Host "[$timestamp] Successfully connected to na.kenny.app (Status: $($response.StatusCode))" -ForegroundColor Green
+
+        $logDir = [System.IO.Path]::GetDirectoryName($logPath)
+        if (!(Test-Path $logDir)) { New-Item -ItemType Directory -Force -Path $logDir | OutNull }
+        Add-Content -Path $logPath -Value $logEntry
+
+        return $response
+    }
+    catch {
+        $ex = $_.Exception
+        $errorMsg = $ex.Message
+
+        $logEntry = "[{0}] KENWELL-APP-TEST | Target=`"{1}`" | Status=`"Exception`" | Error=`"{2}`"" -f $timestamp, $AppUrl, $errorMsg
+        Write-Host "[$timestamp] Failed to connect to na.kenny.app: $errorMsg" -ForegroundColor Red
+    }
+
+    $logDir = [System.IO.Path]::GetDirectoryName($logPath)
+    if (!(Test-Path $logDir)) { New-Item -ItemType Directory -Force -Path $logDir | OutNull }
+    Add-Content -Path $logPath -Value $logEntry
+}
+
+# Execute connection test for na.kenny.app
+Test-KenwellAppEndpoint

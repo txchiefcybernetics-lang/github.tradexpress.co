@@ -1,0 +1,73 @@
+D:\tradexpress.co" | Select-Object -ExpandProperty Access | Format-Table IdentityReference, FileSystemRights, AccessControlType -AutoSize
+
+IdentityReference                           FileSystemRights AccessControlType
+-----------------                           ---------------- -----------------
+BUILTIN\Administrators                           FullControl             Allow
+BUILTIN\Administrators                             268435456             Allow
+NT AUTHORITY\SYSTEM                              FullControl             Allow
+NT AUTHORITY\SYSTEM                                268435456             Allow
+NT AUTHORITY\Authenticated Users         Modify, Synchronize             Allow
+NT AUTHORITY\Authenticated Users                  -536805376             Allow
+BUILTIN\Users                    ReadAndExecute, Synchronize             Allow
+BUILTIN\Users                                    -1610612736             Allow
+
+
+PS D:\tradexpress.co>init Initialize-KenwellColoringBookPolicy
+cat<EOF>>.kenwell/_bash/Not Found
+	# Kenwell Product Policy & RowScheme Auto Policy Maker Module (coloringBook)
+function Initialize-KenwellColoringBookPolicy {
+    [CmdletBinding()]
+    param(
+        [string]$ProductId = "coloringBook",
+        [string]$Subject = "coloringBook",
+        [string]$PolicyName = "rowScheme auto policy maker",
+        [string]$Workspace = "D:\tradexpress.co"
+    )
+
+    $timestamp = (Get-Date).ToString("yyyy-MM-dd HH:mm:ss.fff")
+    $policyUuid = [guid]::NewGuid().ToString()
+    
+    $isLinuxOS = $PSVersionTable.Platform -eq 'Unix' -or $IsLinux
+    $baseDir = if ($isLinuxOS) { [System.IO.Path]::Combine($HOME, ".kenwell") } else { [System.IO.Path]::Combine($env:USERPROFILE, ".kenwell") }
+    $policyPath = [System.IO.Path]::Combine($baseDir, "coloringbook.policy.json")
+    $logPath = [System.IO.Path]::Combine($baseDir, "user_ip.log")
+
+    if (!(Test-Path $baseDir)) {
+        New-Item -ItemType Directory -Force -Path $baseDir | OutNull
+    }
+
+    Write-Host "=== KENWELL COLORING BOOK ROW SCHEME POLICY MAKER ===" -ForegroundColor Cyan
+    Write-Host "Product ID     : $ProductId" -ForegroundColor Gray
+    Write-Host "Subject        : $Subject" -ForegroundColor Gray
+    Write-Host "Auto Policy    : $PolicyName" -ForegroundColor DarkCyan
+    Write-Host "Policy UUID    : $policyUuid" -ForegroundColor Yellow
+
+    try {
+        $policyConfig = [PSCustomObject]@{
+            ProductId   = $ProductId
+            Subject     = $Subject
+            PolicyName  = $PolicyName
+            Workspace   = $Workspace
+            PolicyUuid  = $policyUuid
+            Status      = "Active"
+            Timestamp   = $timestamp
+        }
+
+        $policyConfig | ConvertTo-Json -Depth 4 | Set-Content -Path $policyPath -Encoding utf8
+        
+        $logEntry = "[{0}] KENWELL-POLICY-MAKER | Product=`"{1}`" | Policy=`"{2}`" | Status=`"Initialized`"" -f $timestamp, $ProductId, $PolicyName
+        $logDir = [System.IO.Path]::GetDirectoryName($logPath)
+        if (!(Test-Path $logDir)) { New-Item -ItemType Directory -Force -Path $logDir | OutNull }
+        Add-Content -Path $logPath -Value $logEntry
+
+        Write-Host "[$timestamp] ColoringBook rowScheme auto policy successfully registered and persisted." -ForegroundColor Green
+        return $policyConfig
+    }
+    catch {
+        $ex = $_.Exception
+        Write-Error "Failed to initialize coloringBook policy: $($ex.Message)"
+    }
+}
+
+# Execute policy registration
+Initialize-KenwellColoringBookPolicy

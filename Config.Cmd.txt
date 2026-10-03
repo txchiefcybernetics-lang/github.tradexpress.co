@@ -1,0 +1,6 @@
+::add
+::ip list here
+::local host ip
+endpoint canvass
+(#7)
+	
